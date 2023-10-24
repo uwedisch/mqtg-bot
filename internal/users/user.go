@@ -32,8 +32,13 @@ type User struct {
 
 func (user *User) Start() *common.BotMessage {
 	msg := "Welcome to MQTT Client Telegram Bot"
-	if !user.isMqttConnected() {
-		msg += "\nConfigure connection to your MQTT broker"
+	role := "USER"
+	if user.Owner {
+		role = "OWNER"
+	}
+	msg += fmt.Sprintf("\n\nYou are configured as %v on this server", role)
+	if user.Owner && !user.isMqttConnected() {
+		msg += "\n\nConfigure connection to your MQTT broker"
 	}
 	user.menu.ResetCurrentPath()
 	user.state.Reset()
@@ -114,10 +119,10 @@ func (user *User) disconnectMQTT() {
 }
 
 func (user *User) getMainMenu() *tgbotapi.ReplyKeyboardMarkup {
-	if !user.isMqttConnected() {
+	if user.Owner && !user.isMqttConnected() {
 		return &menu.ConfigureConnectionMenu
 	}
-	return user.menu.GetCurrPathMainMenu()
+	return user.menu.GetCurrPathMainMenu(user.Owner)
 }
 
 func (user *User) connectMqttAndSubscribe() error {

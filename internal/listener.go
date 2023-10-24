@@ -112,6 +112,12 @@ func (bot *TelegramBot) StartBotListener() {
 			if user == nil {
 				continue
 			}
+
+			if !bot.system.Public && !user.Owner {
+				log.Printf("User %v not allowed to communicate with server. Public = false and not Owner", user.UserName)
+				continue
+			}
+
 			user.Lock()
 
 			var message = update.Message

@@ -49,23 +49,27 @@ func (menu *MainMenu) findInButtons(buttons *[]button_interface.ButtonI, message
 	return nil
 }
 
-func (menu *MainMenu) GetCurrPathMainMenu() *tgbotapi.ReplyKeyboardMarkup {
+func (menu *MainMenu) GetCurrPathMainMenu(isUserOwner bool) *tgbotapi.ReplyKeyboardMarkup {
 	var keyboardButtons []tgbotapi.KeyboardButton
 
-	if menu.CurrPath == &menu.CommonButtons {
-		for _, button := range *menu.UserButtons.GetButtons() {
-			keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
-		}
-
-		for _, button := range *menu.CommonButtons.GetButtons() {
-			keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
-		}
+	if !isUserOwner {
+		keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button_names.MAIN_MENU))
 	} else {
-		for _, button := range *menu.CurrPath.GetButtons() {
-			keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
-		}
+		if menu.CurrPath == &menu.CommonButtons {
+			for _, button := range *menu.UserButtons.GetButtons() {
+				keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
+			}
 
-		keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button_names.BACK))
+			for _, button := range *menu.CommonButtons.GetButtons() {
+				keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
+			}
+		} else {
+			for _, button := range *menu.CurrPath.GetButtons() {
+				keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button.GetName()))
+			}
+
+			keyboardButtons = append(keyboardButtons, tgbotapi.NewKeyboardButton(button_names.BACK))
+		}
 	}
 
 	return splitAndConvertIntoMainMenuKeyboardMarkup(keyboardButtons)

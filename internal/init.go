@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"mqtg-bot/internal/database"
+	"mqtg-bot/internal/system"
 	"mqtg-bot/internal/users"
 	"mqtg-bot/internal/users/mqtt"
 	"os"
@@ -20,6 +21,7 @@ type TelegramBot struct {
 	updates        tgbotapi.UpdatesChannel
 	subscriptionCh chan mqtt.SubscriptionMessage
 	usersManager   *users.Manager
+	system         *system.System
 
 	wg              *sync.WaitGroup
 	shutdownChannel chan interface{}
@@ -64,6 +66,8 @@ func InitTelegramBot() *TelegramBot {
 	updateConfig.Timeout = 60
 
 	bot.updates = bot.GetUpdatesChan(updateConfig)
+	bot.system = system.InitSystem(bot.db)
+	bot.system.LoadSystem()
 	bot.usersManager = users.InitManager(bot.db, bot.subscriptionCh)
 	bot.usersManager.LoadAllConnectedUsers()
 
