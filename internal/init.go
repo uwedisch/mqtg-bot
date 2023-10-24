@@ -31,7 +31,7 @@ type TelegramBot struct {
 func InitTelegramBot() *TelegramBot {
 	token := os.Getenv("TELEGRAM_BOT_TOKEN")
 	if token == "" {
-		log.Fatalf("TELEGRAM_BOT_TOKEN does not set")
+		log.Fatalf("TELEGRAM_BOT_TOKEN is not set")
 	}
 
 	botApi, err := tgbotapi.NewBotAPI(token)
