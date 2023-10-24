@@ -10,6 +10,7 @@ type DbUser struct {
 	UserName      string `gorm:"type:varchar(255)"`
 	MqttUrl       string `gorm:"type:varchar(255)"` // (tcp|ssl|ws|wss)://user:password@host:port/path
 	Connected     bool
+	Owner         bool
 	Subscriptions []*Subscription
 	DbMenu        []byte
 }

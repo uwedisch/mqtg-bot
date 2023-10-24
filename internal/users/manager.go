@@ -59,6 +59,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 	}
 
 	um.RLock()
+	um.UpdateTotalUsers()
 	botUser, ok := um.users[message.Chat.ID]
 	um.RUnlock()
 
@@ -72,6 +73,14 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 			dbUser.ChatID = message.Chat.ID
 			dbUser.UserName = message.From.UserName
 
+			var count int64
+			um.db.Model(&models.DbUser{}).Count(&count)
+
+			// First user is automatically the owner
+			if count == 0 {
+				dbUser.Owner = true
+			}
+			log.Printf("Create User %v (Chat.ID %v), Owner %v", dbUser.UserName, dbUser.ChatID, dbUser.Owner)
 			um.db.Create(&dbUser)
 
 			um.UpdateTotalUsers()
