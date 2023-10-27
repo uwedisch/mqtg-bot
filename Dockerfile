@@ -1,4 +1,4 @@
-FROM golang:1.15.2 as builder
+FROM golang:1.21.3 as builder
 WORKDIR /build
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -mod vendor -a -installsuffix cgo -o bot main.go
