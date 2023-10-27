@@ -48,7 +48,7 @@ func (um *Manager) UpdateTotalUsers() {
 	um.metrics.numOfTotalUsers.Set(float64(count))
 }
 
-func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
+func (um *Manager) GetUserByChatIdFromUpdate(systemPublic bool, update *tgbotapi.Update) *User {
 	var message = update.Message
 	if message == nil {
 		if update.CallbackQuery != nil {
@@ -63,7 +63,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 	botUser, ok := um.users[message.Chat.ID]
 	um.RUnlock()
 
-	if !ok { // user not found, need to create
+	if !ok { // user not found, need to load (or create)
 		var dbUser models.DbUser
 
 		// first try select from db
@@ -77,13 +77,30 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 			um.db.Model(&models.DbUser{}).Count(&count)
 
 			// First user is automatically the owner
+			hasRoleOwner := false
 			if count == 0 {
-				dbUser.Owner = true
+				hasRoleOwner = true
+				newUserRoleOwner := &models.DbUserRole{
+					DbUserID: dbUser.ID,
+					Role:     "OWNER",
+				}
+				dbUser.Roles = append(dbUser.Roles, newUserRoleOwner)
 			}
-			log.Printf("Create User %v (Chat.ID %v), Owner %v", dbUser.UserName, dbUser.ChatID, dbUser.Owner)
+
+			if systemPublic || hasRoleOwner {
+				newUserRoleUser := &models.DbUserRole{
+					DbUserID: dbUser.ID,
+					Role:     "USER",
+				}
+				dbUser.Roles = append(dbUser.Roles, newUserRoleUser)
+			}
+
+			log.Printf("Create User %v (Chat.ID %v), Roles %v", dbUser.UserName, dbUser.ChatID, len(dbUser.Roles))
 			um.db.Create(&dbUser)
 
 			um.UpdateTotalUsers()
+		} else {
+			um.db.Where("db_user_id = ?", dbUser.ID).First(&dbUser.Roles)
 		}
 
 		botUser = um.LoadDatabaseUserIntoBotUsers(&dbUser)
@@ -94,6 +111,7 @@ func (um *Manager) GetUserByChatIdFromUpdate(update *tgbotapi.Update) *User {
 
 func (um *Manager) LoadDatabaseUserIntoBotUsers(dbUser *models.DbUser) *User {
 	um.db.Where("db_user_id = ?", dbUser.ID).Order("subscriptions.id").Find(&dbUser.Subscriptions)
+	um.db.Where("db_user_id = ?", dbUser.ID).Order("db_user_roles.id").Find(&dbUser.Roles)
 
 	botUser := &User{
 		DbUser:         dbUser,

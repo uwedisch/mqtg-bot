@@ -66,6 +66,7 @@ func NewSQLiteConnection() (*gorm.DB, error) {
 func autoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&models.DbUser{},
+		&models.DbUserRole{},
 		&models.DbSystem{},
 		&models.Subscription{},
 		&models.SubscriptionData{},

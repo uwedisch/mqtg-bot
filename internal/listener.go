@@ -108,12 +108,12 @@ func (bot *TelegramBot) StartBotListener() {
 		case update := <-bot.updates:
 			bot.metrics.numOfIncMessagesFromTelegram.Inc()
 
-			user := bot.usersManager.GetUserByChatIdFromUpdate(&update)
+			user := bot.usersManager.GetUserByChatIdFromUpdate(bot.system.Public, &update)
 			if user == nil {
 				continue
 			}
 
-			if !bot.system.Public && !user.Owner {
+			if !bot.system.Public && !user.HasAnyRole() {
 				log.Printf("User %v not allowed to communicate with server. Public = false and not Owner", user.UserName)
 				continue
 			}

@@ -31,14 +31,14 @@ type User struct {
 }
 
 func (user *User) Start() *common.BotMessage {
-	msg := "Welcome to MQTT Client Telegram Bot"
-	role := "USER"
-	if user.Owner {
-		role = "OWNER"
+	msg := "Welcome to MQTT Client Telegram Bot\n\n"
+	msg += "You have this roles:\n"
+	for _, role := range user.Roles {
+		msg += fmt.Sprintf("- %v\n", role.Role)
 	}
-	msg += fmt.Sprintf("\n\nYou are configured as %v on this server", role)
-	if user.Owner && !user.isMqttConnected() {
-		msg += "\n\nConfigure connection to your MQTT broker"
+
+	if user.IsOwner() && !user.isMqttConnected() {
+		msg += "\nConfigure connection to your MQTT broker\n"
 	}
 	user.menu.ResetCurrentPath()
 	user.state.Reset()
@@ -119,10 +119,10 @@ func (user *User) disconnectMQTT() {
 }
 
 func (user *User) getMainMenu() *tgbotapi.ReplyKeyboardMarkup {
-	if user.Owner && !user.isMqttConnected() {
+	if user.IsOwner() && !user.isMqttConnected() {
 		return &menu.ConfigureConnectionMenu
 	}
-	return user.menu.GetCurrPathMainMenu(user.Owner)
+	return user.menu.GetCurrPathMainMenu()
 }
 
 func (user *User) connectMqttAndSubscribe() error {
@@ -171,4 +171,26 @@ func (user *User) processConnectionString(mqttUrl string) *common.BotMessage {
 	userAnswer.MainMenu = user.getMainMenu()
 
 	return &userAnswer
+}
+
+func (user *User) IsOwner() bool {
+	set := make(map[string]bool)
+	for _, v := range user.Roles {
+		set[v.Role] = true
+	}
+	_, roleFound := set["OWNER"]
+	return roleFound
+}
+
+func (user *User) IsUser() bool {
+	set := make(map[string]bool)
+	for _, v := range user.Roles {
+		set[v.Role] = true
+	}
+	_, roleFound := set["USER"]
+	return roleFound || user.IsOwner()
+}
+
+func (user *User) HasAnyRole() bool {
+	return len(user.Roles) > 0
 }

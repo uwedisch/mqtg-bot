@@ -213,7 +213,7 @@ func (user *User) ProcessMessage(messageData []byte, isItPhoto bool) *common.Bot
 		button := user.menu.SetPressedButtonLikeCurrentPath(message, user.menu.CurrPath)
 		if button == nil {
 			return &common.BotMessage{
-				MainMenu: user.menu.GetCurrPathMainMenu(user.Owner),
+				MainMenu: user.menu.GetCurrPathMainMenu(),
 				MainText: user.menu.CurrPath.GetName(),
 			}
 		}
@@ -222,7 +222,7 @@ func (user *User) ProcessMessage(messageData []byte, isItPhoto bool) *common.Bot
 		switch button.GetType() {
 		case button_types.FOLDER:
 			return &common.BotMessage{
-				MainMenu: user.menu.GetCurrPathMainMenu(user.Owner),
+				MainMenu: user.menu.GetCurrPathMainMenu(),
 				MainText: user.menu.CurrPath.GetName(),
 			}
 		case button_types.SINGLE_VALUE, button_types.TOGGLE:
@@ -240,7 +240,7 @@ func (user *User) ProcessMessage(messageData []byte, isItPhoto bool) *common.Bot
 			button.SwitchState()
 
 			return &common.BotMessage{
-				MainMenu: user.menu.GetCurrPathMainMenu(user.Owner),
+				MainMenu: user.menu.GetCurrPathMainMenu(),
 				MainText: mainText,
 			}
 
@@ -254,7 +254,7 @@ func (user *User) ProcessMessage(messageData []byte, isItPhoto bool) *common.Bot
 
 		case button_types.PRINT_LAST_SUB_VALUE:
 			var userAnswer = common.BotMessage{
-				MainMenu: user.menu.GetCurrPathMainMenu(user.Owner),
+				MainMenu: user.menu.GetCurrPathMainMenu(),
 			}
 
 			var subscriptionID = button.GetSubscriptions()[0]
