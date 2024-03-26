@@ -25,6 +25,7 @@ mqtg-bot is an easy-to-configure for your needs MQTT client Telegram bot. Withou
 
 ## Features
 
+- [x] Dockerfile using ubuntu:latest for SQLite support
 - [x] Connecting to MQTT broker
     - [x] tcp / ssl / ws / wss
 - [x] Supported databases
