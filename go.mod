@@ -1,6 +1,6 @@
 module mqtg-bot
 
-go 1.21.0
+go 1.21.3
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.2.0
